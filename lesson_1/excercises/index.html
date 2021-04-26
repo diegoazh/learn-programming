@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Ahorcado</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
+  <style type="text/css">
+    body {
+      background-color: wheat;
+    }
+    body * {
+      font-family: 'Roboto', sans-serif;
+    }
+    h1 {
+      text-align: center;
+    }
+    .player-name {
+      display: inline;
+      font-weight: bold;
+    }
+    #selected_players, #game {
+      display: none;
+    }
+    #game .word span {
+      display: inline-block;
+      width: 3rem;
+      height: 3rem;
+      margin-right: .5rem;
+      border-bottom: solid 3px black;
+    }
+    #doll1, #doll2 {
+      display: inline-block;
+      width: 49%;
+    }
+    #doll1 p, #doll2 p {
+      text-align: center;
+    }
+    #doll1 img, #doll2 img {
+      display: block;
+      margin: 0 auto;
+    }
+    #choose_section {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    El Ahorcado
+    <br>
+    <small>Bienvenidos</small>
+  </h1>
+
+  <div id="players">
+    <label for="player1">
+      Jugador 1
+      <input type="text" name="player1" id="player1" placeholder="ingrese el nickname del jugador 1">
+    </label>
+    <br>
+    <label for="player2">
+      Jugador 2
+      <input type="text" name="player2" id="player2" placeholder="ingrese el nickname del jugador 2">
+    </label>
+    <br>
+    <button type="button" id="save_players">Cargar</button>
+  </div>
+  <div id="selected_players">
+    <p class="player-name">
+      Jugador 1: 
+      <span id="player1_name"></span>
+    </p>
+    <br>
+    <p class="player-name">
+      Jugador 2:
+      <span id="player2_name"></span>
+    </p>
+  </div>
+  <div id="game">
+    <h3>
+      Turno: <span id="player_turn"></span>
+    </h3>
+    <div id="doll1">
+      <p id="player_of_doll_1"></p>
+      <img id="doll_player0" src="images/doll_0.jpg" alt="estado del ahoracado">
+    </div>
+    <div id="doll2">
+      <p id="player_of_doll_2"></p>
+      <img id="doll_player1" src="images/doll_0.jpg" alt="estado del ahoracado">
+    </div>
+    <br>
+    <h1 class="word">...</h1>
+    <div id="choose_section">
+      <label for="choosed_letter">
+        Ingrese una letra o la palabra si desea arriesgar:
+        <input type="text" name="choosed_letter" id="choosed_letter" placeholder="ingrese letra o palabra">
+      </label>
+      <button type="button" id="btn_choose">elegir</button>
+      <h2>Ganador: <span id="winner">...</span></h2>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    let finish = false;
+    let player1;
+    let player2;
+    const turns = [];
+    let selected = 0;
+    let discoveredLetters = [];
+    let dollStatus = [0, 0];
+    let letter = '';
+    let splitSelection = [];
+    let letters;
+    let words = [
+      'otorrinolaringologo',
+      'cafe',
+      'supermercado',
+      'programador',
+      'desarrollador',
+      'frontend',
+      'backend',
+      'quimica',
+    ];
+
+    const btnSave = window.document.getElementById('save_players');
+    btnSave.addEventListener('click', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      player1 = document.getElementById('player1').value.trim();
+      player2 = document.getElementById('player2').value.trim();
+      turns[0] = player1;
+      turns[1] = player2;
+
+      if (player1 && player2) {
+        // player selection
+        document.getElementById('players').style.display = 'none';
+        document.getElementById('player1_name').innerText = player1;
+        document.getElementById('player2_name').innerText = player2;
+        document.getElementById('selected_players').style.display = 'block';
+        document.getElementById('game').style.display = 'block';
+        document.getElementById('player_of_doll_1').innerText = `Estado de ${player1}`;
+        document.getElementById('player_of_doll_2').innerText = `Estado de ${player2}`;
+        selected = Math.floor(Math.random() * (2 - 0) + 0);
+        document.getElementById('player_turn').innerText = turns[selected];
+
+        // word selection
+        const index = Math.floor(Math.random() * (words.length - 0) + 0);
+        const wordOfTheGame = words[index];
+        letters = wordOfTheGame.split('');
+        const pWord = document.getElementsByClassName('word');
+        pWord[0].innerText = '';
+        
+        for (let index = 0; index < letters.length; index++) {
+          const span = document.createElement('span');
+          span.id = `letter_${index}`;
+          span.innerText = '';
+          pWord[0].appendChild(span);
+        }
+
+        // choose a letter
+        const btnChoose = document.getElementById('btn_choose');
+        btnChoose.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          letter = document.getElementById('choosed_letter').value.trim();
+
+          if (!finish) {
+            gameInCourse();
+          }
+        });
+      } else {
+        document.getElementById('player1').value = '';
+        document.getElementById('player2').value = '';
+        alert('ingrese un nombre valido, por favor');
+      }
+    });
+
+    function gameInCourse() {
+      if (letter) {
+        let splitSelection = letter.split('');
+
+        if (splitSelection.length && splitSelection.length > 1) {
+          finish = true;
+
+          if (letter === letters.join('')) {
+            document.getElementById('winner').innerText = turns[selected];
+            alert(`Felicitaciones ganaste ${turns[selected]}`);
+            letters.forEach((letter, index) => {
+              document.getElementById(`letter_${index}`).innerText = letter;
+            });
+          } else {
+            document.getElementById('winner').innerText = turns[selected ? 0 : 1];
+          }
+        } else {
+          let exist = false;
+          letters.forEach((letter, index) => {
+            if (!discoveredLetters[index] && splitSelection[0] === letter) {
+              document.getElementById(`letter_${index}`).innerText = letters[index];
+              discoveredLetters[index] = true;
+              exist = true;
+            }
+            // TODO: check if letter was discovered and don't take it as a failed chance
+          });
+
+          if (exist) {
+            const allWasDiscovered = discoveredLetters.reduce((acc, isDiscored) => {
+                if (acc && !isDiscored) {
+                  return isDiscored;
+                }
+              }, true)
+
+              if (allWasDiscovered) {
+                finish = true;
+                document.getElementById('winner').innerText = turns[selected];
+                alert(`Felicitaciones ganaste ${turns[selected]}`);
+                letters.forEach((letter, index) => {
+                  document.getElementById(`letter_${index}`).innerText = letter;
+                });
+              } else {
+                document.getElementById('choosed_letter').value = '';
+                alert('acertaste, podes continuar eligiendo');
+              }
+          } else {
+            selected = selected ? 0 : 1;
+            alert(`la palabra no contiene la letra: ${splitSelection[0]}`);
+            // TODO: check the status of the doll before adding 1 and if status is 9 finish the game
+            dollStatus[selected] += 1;
+            document.getElementById(`doll_player${selected}`).src = `./images/doll_${dollStatus[selected]}.jpg`;
+            document.getElementById('player_turn').innerText = turns[selected];
+            document.getElementById('choosed_letter').value = '';
+          }
+
+          letter = '';
+          splitSelection = [];
+        }
+      } else {
+        alert('debe ingresar algun texto');
+      }
+    }
+  </script>
+</body>
+</html>

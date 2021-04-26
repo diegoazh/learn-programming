@@ -224,7 +224,7 @@ do {
       console.error(`usted ingreso una comida con menos de tres caracteres o ingreso un numero`)
     }
 
-    if (Number.isInteger) {
+    if (Number.isInteger(age)) {
       console.log(`La edad ingresada es: ${age}`)
     } else {
       console.error(`usted no ingreso un numero valido para la edad`)
